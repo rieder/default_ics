@@ -53,6 +53,7 @@ def create_ics():
     evo_to_model.copy_attributes(["mass"])
     dataformats = {
         "amuse": "hdf5",
+        "amuse-txt": "txt",
         "csv": "csv",
     }
     model_name = "Plummer_seed%i_N%i_salpeter" % (seed, number_of_particles)
@@ -65,6 +66,9 @@ def create_ics():
             particles,
             "%s/zams.%s" % (save_dir, extension),
             dataformat,
+            attribute_names=[
+                "mass", "x", "y", "z", "vx", "vy", "vz",
+            ],
         )
     for time in timesteps:
         stellar_evolution.evolve_model(time)
