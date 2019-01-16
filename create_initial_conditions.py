@@ -56,6 +56,7 @@ def create_ics():
         "amuse-txt": "txt",
         "csv": "csv",
     }
+    attribute_names = ["mass", "x", "y", "z", "vx", "vy", "vz"]
     model_name = "Plummer_seed%i_N%i_salpeter" % (seed, number_of_particles)
     save_dir = "ICs/%s" % model_name
     if not os.path.exists(save_dir):
@@ -66,9 +67,7 @@ def create_ics():
             particles,
             "%s/zams.%s" % (save_dir, extension),
             dataformat,
-            attribute_names=[
-                "mass", "x", "y", "z", "vx", "vy", "vz",
-            ],
+            attribute_names=attribute_names,
         )
     for time in timesteps:
         stellar_evolution.evolve_model(time)
@@ -80,6 +79,7 @@ def create_ics():
                     save_dir, time.value_in(units.Gyr), extension,
                 ),
                 dataformat,
+                attribute_names=attribute_names,
             )
 
     stellar_evolution.stop()
