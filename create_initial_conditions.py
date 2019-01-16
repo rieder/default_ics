@@ -9,6 +9,7 @@ from amuse.ic.salpeter import new_salpeter_mass_distribution
 from amuse.io import write_set_to_file
 from amuse.units import units, nbody_system
 from amuse.units.quantities import VectorQuantity
+from amuse.support.data import ParticlesWithUnitsConverted
 
 
 def create_ics():
@@ -62,6 +63,9 @@ def create_ics():
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
+    particles_nbody = ParticlesWithUnitsConverted(
+        particles, converter.as_converter_from_nbody_to_si(),
+    )
     for dataformat, extension in dataformats.items():
         write_set_to_file(
             particles,
@@ -69,13 +73,31 @@ def create_ics():
             dataformat,
             attribute_names=attribute_names,
         )
+        write_set_to_file(
+            particles_nbody,
+            "%s/henon-zams.%s" % (save_dir, extension),
+            dataformat,
+            attribute_names=attribute_names,
+        )
+
     for time in timesteps:
         stellar_evolution.evolve_model(time)
         evo_to_model.copy_attributes(["mass"])
+        particles_nbody = ParticlesWithUnitsConverted(
+            particles, converter.as_converter_from_nbody_to_si(),
+        )
         for dataformat, extension in dataformats.items():
             write_set_to_file(
                 particles,
                 "%s/%04.1fGyr.%s" % (
+                    save_dir, time.value_in(units.Gyr), extension,
+                ),
+                dataformat,
+                attribute_names=attribute_names,
+            )
+            write_set_to_file(
+                particles_nbody,
+                "%s/henon-%04.1fGyr.%s" % (
                     save_dir, time.value_in(units.Gyr), extension,
                 ),
                 dataformat,
