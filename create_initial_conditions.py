@@ -12,6 +12,21 @@ from amuse.units.quantities import VectorQuantity
 from amuse.support.data import ParticlesWithUnitsConverted
 
 
+def to_virial_ratio(particles, virial_ratio=0.5,):
+    "Scales particles' velocities so that the virial ratio is the one given"
+    total_mass = particles.mass.sum()
+    converter = nbody_system.nbody_to_si(
+        total_mass,
+        1 | units.parsec,
+    )
+
+    particles.scale_to_standard(
+        convert_nbody=converter,
+        virial_ratio=virial_ratio,
+    )
+    return particles
+
+
 def create_ics():
     "Create ICs for a plummer sphere at different stellar ages"
     seed = 1
@@ -83,6 +98,13 @@ def create_ics():
     for time in timesteps:
         stellar_evolution.evolve_model(time)
         evo_to_model.copy_attributes(["mass"])
+
+        # Re-scale to virial equilibrium
+        particles = to_virial_ratio(
+            particles,
+            virial_ratio=virial_ratio,
+        )
+        
         particles_nbody = ParticlesWithUnitsConverted(
             particles, converter.as_converter_from_nbody_to_si(),
         )
